@@ -15,7 +15,7 @@
     display: none;
     flex-direction: column;
     box-sizing: border-box;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 #char-bg-panel.dark {
@@ -35,7 +35,7 @@
     justify-content: space-between;
     align-items: center;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 15px;
     margin-bottom: 12px;
 }
 
@@ -87,7 +87,6 @@
 #char-bg-panel .char-bg-inline-label {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 5px !important;
     width: auto !important;
     margin: 0 !important;
     white-space: nowrap !important;
