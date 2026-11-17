@@ -184,7 +184,6 @@ html.char-bg-splash-active #loader.splash-screen {
     display: block !important;
     position: fixed !important;
     inset: 0 !important;
-    z-index: 100000 !important;
     width: 100vw !important;
     height: 100vh !important;
     max-width: none !important;
@@ -201,7 +200,8 @@ html.char-bg-splash-active #loader.splash-screen {
     pointer-events: none !important;
 }
 
-html.char-bg-splash-active #loader.splash-screen > * {
+/* 保留我们插入的 #char-bg-splash-stage，其余自带子元素全部隐藏 */
+html.char-bg-splash-active #loader.splash-screen > :not(#char-bg-splash-stage) {
     display: none !important;
 }
 
@@ -253,14 +253,18 @@ html.char-bg-splash-active #loader.splash-screen::after {
     animation: st-char-splash-progress 3.8s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
-/* 开屏多图轮换舞台（挂载在 body 最上层 UI 之上、loader 之下） */
+/* 开屏多图轮换舞台（直接挂载在 #loader.splash-screen 或 #preloader 内部） */
 #char-bg-splash-stage {
     position: fixed !important;
     inset: 0 !important;
-    z-index: 99998 !important;
+    z-index: 1 !important;
     overflow: hidden !important;
     pointer-events: none !important;
     background-color: transparent !important;
+}
+
+#char-bg-splash-stage.is-empty {
+    background-color: #0b0d13 !important;
 }
 
 .char-bg-splash-slide {
