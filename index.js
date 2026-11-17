@@ -1,3 +1,6 @@
+// SillyTavern Third-Party Extension: 角色背景与开屏美化
+// Author: @tomato_king0809
+
 (() => {
     const STORAGE_KEY = 'char_bg_data';
     const MENU_BTN_ID = 'st-char-bg-ext-btn';
@@ -190,57 +193,55 @@
         return '';
     };
 
-    // 将单个自定义输入项解析为图片链接（支持直接图床/路径 或 角色名字）
+    // 将单个自定义输入项解析为图片链接：检测到网址/路径直接作为图床链接，否则按角色名匹配或拼接 /characters/角色名.png
     const resolveCustomEntry = (rawValue) => {
         const val = (rawValue || '').trim();
         if (!val) return '';
 
+        // 1. 检测到网址或图片路径，直接作为图床链接放入 url(...)
         if (
-            /^(https?:\/\/|\/|\.\/|\.\.\/|data:|blob:)/i.test(val) ||
+            /^(https?:\/\/|\/\/|\/|\.\/|\.\.\/|data:|blob:)/i.test(val) ||
             /\.(png|jpe?g|webp|gif|avif|bmp|svg)(\?.*)?$/i.test(val)
         ) {
             return val;
         }
 
+        // 2. 否则视为角色名字：优先匹配角色库中的真实文件名，找不到则直接按 /characters/角色名.png 拼接
         try {
             const ctx = window.SillyTavern?.getContext?.();
             const chars = Array.isArray(ctx?.characters) ? ctx.characters : [];
-            if (chars.length === 0) return null; // 上下文角色库尚未加载
+            if (chars.length > 0) {
+                const lower = val.toLowerCase();
+                const matched =
+                    chars.find(c => c?.name === val) ||
+                    chars.find(c => c?.name?.toLowerCase() === lower) ||
+                    chars.find(c => c?.avatar && c.avatar.replace(/\.[^.]+$/, '').toLowerCase() === lower);
 
-            const lower = val.toLowerCase();
-            const matched =
-                chars.find(c => c?.name === val) ||
-                chars.find(c => c?.name?.toLowerCase() === lower) ||
-                chars.find(c => c?.avatar && c.avatar.replace(/\.[^.]+$/, '').toLowerCase() === lower);
-
-            if (matched?.avatar) {
-                if (typeof ctx.getThumbnailUrl === 'function') {
-                    return ctx.getThumbnailUrl('avatar', matched.avatar);
+                if (matched?.avatar) {
+                    return `/characters/${encodeURIComponent(matched.avatar)}`;
                 }
-                return `/characters/${encodeURIComponent(matched.avatar)}`;
             }
         } catch (e) {}
 
-        return '';
+        return `/characters/${encodeURIComponent(val)}.png`;
     };
 
     // 获取自定义模式下的最终有效图片数组
     const resolveCustomSplashUrls = () => {
-        let contextPending = false;
-        const resolved = [];
+        let charsLoaded = false;
+        try {
+            const ctx = window.SillyTavern?.getContext?.();
+            charsLoaded = Array.isArray(ctx?.characters) && ctx.characters.length > 0;
+        } catch (e) {}
 
-        for (const item of state.customInputs) {
-            const url = resolveCustomEntry(item);
-            if (url === null) {
-                contextPending = true;
-                break;
-            }
-            if (url) resolved.push(url);
+        // 启动早期若角色库尚未就绪且本地已有缓存结果，优先用缓存避免前缀卡名误判
+        if (!charsLoaded && Array.isArray(state.cachedCustomUrls) && state.cachedCustomUrls.length > 0) {
+            return state.cachedCustomUrls;
         }
 
-        if (contextPending) {
-            return state.cachedCustomUrls || [];
-        }
+        const resolved = state.customInputs
+            .map(resolveCustomEntry)
+            .filter(Boolean);
 
         const prevKey = (state.cachedCustomUrls || []).join('|');
         const nextKey = resolved.join('|');
@@ -547,6 +548,7 @@
                 $('#char-bg-custom-2').val(),
                 $('#char-bg-custom-3').val(),
             ];
+            state.cachedCustomUrls = [];
             updateAll(true);
         });
 
@@ -556,7 +558,12 @@
     const mountMenuButton = () => {
         const $menu = $('#extensionsMenu');
         if ($menu.length > 0 && $(`#${MENU_BTN_ID}`).length === 0) {
-            const $btn = $(`<div id="${MENU_BTN_ID}" class="list-group-item">角色背景调整</div>`);
+            const $btn = $(`
+                <div id="${MENU_BTN_ID}" class="list-group-item flex-container flexGap5" style="align-items:center;">
+                    <i class="fa-solid fa-image"></i>
+                    <span>角色背景调整</span>
+                </div>
+            `);
             $btn.on('click', () => {
                 initPanel();
                 $(`#${PANEL_ID}`).toggle();
