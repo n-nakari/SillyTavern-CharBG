@@ -95,14 +95,6 @@
     font-weight: normal !important;
 }
 
-#char-bg-panel input[type="checkbox"],
-#char-bg-panel input[type="radio"] {
-    width: auto !important;
-    margin: 0 !important;
-    flex-shrink: 0 !important;
-    cursor: pointer !important;
-}
-
 #char-bg-panel input[type="range"] {
     width: 100%;
     cursor: pointer;
