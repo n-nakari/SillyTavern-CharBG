@@ -1,12 +1,11 @@
 /* ===== 设置面板基础样式 ===== */
 #char-bg-panel {
     position: fixed !important;
-    top: 50% !important;
+    top: 10dvh !important;
     right: 10px !important;
-    transform: translateY(-50%);
     z-index: 999999 !important;
     width: 248px !important;
-    max-height: 88vh;
+    max-height: 85dvh;
     overflow-y: auto;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
@@ -157,7 +156,7 @@ html.char-bg-splash-active #preloader {
     position: fixed !important;
     inset: 0 !important;
     z-index: 99999 !important;
-    background-color: #0b0d13 !important;
+    background-color: transparent !important;
     background-image: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -185,6 +184,7 @@ html.char-bg-splash-active #loader.splash-screen {
     display: block !important;
     position: fixed !important;
     inset: 0 !important;
+    z-index: 100000 !important;
     width: 100vw !important;
     height: 100vh !important;
     max-width: none !important;
@@ -253,14 +253,14 @@ html.char-bg-splash-active #loader.splash-screen::after {
     animation: st-char-splash-progress 3.8s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
-/* 开屏多图轮换舞台（放在 #preloader 内部，盖住后续加载的 top-bar / send_form） */
+/* 开屏多图轮换舞台（挂载在 body 最上层 UI 之上、loader 之下） */
 #char-bg-splash-stage {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    overflow: hidden;
-    pointer-events: none;
-    background-color: #0b0d13;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99998 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    background-color: transparent !important;
 }
 
 .char-bg-splash-slide {
