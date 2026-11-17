@@ -4,7 +4,7 @@
     top: 10dvh !important;
     right: 10px !important;
     z-index: 999999 !important;
-    width: 248px !important;
+    width: 70% !important;
     max-height: 85dvh;
     overflow-y: auto;
     backdrop-filter: blur(20px) !important;
@@ -40,7 +40,7 @@
 }
 
 .char-bg-section {
-    margin-bottom: 12px;
+    margin-bottom: 15px;
 }
 
 .char-bg-group-row {
@@ -53,14 +53,13 @@
 
 .char-bg-group-title {
     width: 100%;
-    font-size: 13px;
 }
 
 .ctrl-row {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
 }
 
 .ctrl-label-line {
@@ -110,9 +109,7 @@
 }
 
 .char-bg-splash-sub {
-    margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid rgba(128, 128, 128, 0.25);
     display: none;
     flex-direction: column;
     gap: 8px;
@@ -124,45 +121,12 @@
     gap: 6px;
 }
 
-.char-bg-custom-hint {
-    font-size: 11px;
-    opacity: 0.72;
-    line-height: 1.3;
-}
-
-.char-bg-custom-input {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 5px 8px !important;
-    border-radius: 6px !important;
-    font-size: 12px !important;
-    outline: none !important;
-    border: 1px solid rgba(128, 128, 128, 0.35) !important;
-    background: rgba(128, 128, 128, 0.14) !important;
-    color: inherit !important;
-}
-
-.char-bg-custom-input:focus {
-    border-color: rgba(160, 210, 255, 0.75) !important;
-}
-
 /* 让 #bg1 调整滤镜时带有平滑过渡动画 */
 #bg1 {
     transition: filter 0.3s ease !important;
 }
 
 /* ===== 开屏美化样式（仅在 html.char-bg-splash-active 时激活） ===== */
-html.char-bg-splash-active #preloader {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 99999 !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    overflow: hidden !important;
-}
-
 html.char-bg-splash-active dialog.popup:has(#loader),
 html.char-bg-splash-active .popup[open]:has(#loader),
 html.char-bg-splash-active .popup:has(#loader) > .popup-body,
@@ -253,7 +217,7 @@ html.char-bg-splash-active #loader.splash-screen::after {
     animation: st-char-splash-progress 3.8s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
-/* 开屏多图轮换舞台（直接挂载在 #loader.splash-screen 或 #preloader 内部） */
+/* 开屏多图轮换舞台（直接挂载在 #loader.splash-screen 内部） */
 #char-bg-splash-stage {
     position: fixed !important;
     inset: 0 !important;
