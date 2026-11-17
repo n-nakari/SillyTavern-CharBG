@@ -1,3 +1,6 @@
+// SillyTavern Third-Party Extension: 角色背景与开屏美化
+// Author: @tomato_king0809
+
 (() => {
     const STORAGE_KEY = 'char_bg_data';
     const MENU_BTN_ID = 'st-char-bg-ext-btn';
@@ -19,7 +22,7 @@
     let splashCarouselTimer = null;
     let lastSplashUrlsKey = '';
 
-    // 读取本地配置（纯同步，供开屏首帧使用）
+    // 读取本地配置（纯同步，供开屏阶段使用）
     const readSavedConfig = () => {
         try {
             const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -169,9 +172,8 @@
 
     // 获取当前角色卡面链接
     const getTargetAvatarSrc = () => {
-        const chatImg = document.querySelector('#chat .mes[is_user="false"] .avatar img:last-of-type');
         const allAvatars = document.querySelectorAll('#chat .mes[is_user="false"] .avatar img');
-        const lastDomAvatar = allAvatars.length > 0 ? allAvatars[allAvatars.length - 1] : chatImg;
+        const lastDomAvatar = allAvatars.length > 0 ? allAvatars[allAvatars.length - 1] : null;
         const domSrc = lastDomAvatar?.getAttribute('src');
         if (domSrc) return domSrc;
 
@@ -238,7 +240,6 @@
             if (url) resolved.push(url);
         }
 
-        // 若角色库尚未就绪，先使用上次缓存在本地的解析结果
         if (contextPending) {
             return state.cachedCustomUrls || [];
         }
@@ -250,6 +251,25 @@
             saveConfig();
         }
         return resolved;
+    };
+
+    // 判断当前是否仍处于酒馆加载画面（兼容 #preloader 与 dialog.popup > #loader）
+    const isSplashLoaderVisible = () => {
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            const st = window.getComputedStyle(preloader);
+            if (st.display !== 'none' && st.visibility !== 'hidden' && Number(st.opacity) > 0) {
+                return true;
+            }
+        }
+        const popupLoader = document.querySelector('dialog.popup[open]:has(#loader), .popup[open]:has(#loader)');
+        if (popupLoader) {
+            const st = window.getComputedStyle(popupLoader);
+            if (st.display !== 'none' && st.visibility !== 'hidden') {
+                return true;
+            }
+        }
+        return false;
     };
 
     // 挂载并控制开屏画面（支持单图展示与多图视差左滑轮换）
@@ -264,26 +284,25 @@
         document.documentElement.classList.toggle('char-bg-splash-active', state.splashEnabled);
 
         const existingStage = document.getElementById(SPLASH_STAGE_ID);
-        if (!state.splashEnabled) {
+        if (!state.splashEnabled || !isSplashLoaderVisible()) {
             stopSplashCarousel();
             if (existingStage) existingStage.remove();
             lastSplashUrlsKey = '';
             return;
         }
 
-        const preloader = document.getElementById('preloader');
-        if (!preloader) return;
-
-        // 若加载页已隐藏则停止轮换计时器
-        const preloaderStyle = window.getComputedStyle(preloader);
-        if (preloaderStyle.display === 'none' || preloaderStyle.visibility === 'hidden') {
-            stopSplashCarousel();
-            return;
-        }
-
+        const currentAvatar = getTargetAvatarSrc() || state.lastAvatar;
         const urls = state.splashMode === 'custom'
             ? resolveCustomSplashUrls()
-            : [state.lastAvatar].filter(Boolean);
+            : [currentAvatar].filter(Boolean);
+
+        // 若还没有任何可用图片链接，则不创建遮挡层，避免出现黑屏盖住 #bg1
+        if (urls.length === 0) {
+            stopSplashCarousel();
+            if (existingStage) existingStage.remove();
+            lastSplashUrlsKey = '';
+            return;
+        }
 
         const urlsKey = urls.join('|');
         if (existingStage && urlsKey === lastSplashUrlsKey) return;
@@ -308,15 +327,15 @@
         vignette.className = 'char-bg-splash-vignette';
         stage.appendChild(vignette);
 
-        preloader.insertBefore(stage, preloader.firstChild);
+        (document.body || document.documentElement).appendChild(stage);
 
         // 多于一张图时：视差左移 + 柔滑缩放切换
         if (slides.length > 1) {
             let currentIdx = 0;
             splashCarouselTimer = setInterval(() => {
-                const pl = document.getElementById('preloader');
-                if (!pl || window.getComputedStyle(pl).display === 'none') {
+                if (!isSplashLoaderVisible()) {
                     stopSplashCarousel();
+                    document.getElementById(SPLASH_STAGE_ID)?.remove();
                     return;
                 }
 
@@ -325,7 +344,6 @@
                 const prevSlide = slides[prevIdx];
                 const nextSlide = slides[currentIdx];
 
-                // 将下一张图重置到右侧准备位（无过渡）
                 nextSlide.style.transition = 'none';
                 nextSlide.classList.remove('is-active', 'is-leaving');
                 void nextSlide.offsetWidth;
@@ -342,7 +360,7 @@
         }
     };
 
-    // ========== 1. 脚本顶部同步首帧初始化（开屏阶段即刻生效） ==========
+    // ========== 1. 脚本顶部同步初始化 ==========
     applyBgCss(state.enabled, state.bright, state.sat, state.blur, state.lastAvatar);
     applyOverrideCss(state.clearChat, state.clearTop, state.clearBottom);
     renderSplashStage();
@@ -584,16 +602,14 @@
         const chatObserver = new MutationObserver(scheduleUpdate);
         chatObserver.observe(chatEl, { childList: true, subtree: true });
 
-        // 监听 #preloader 隐藏后自动停止轮换计时器
+        // 监听 #preloader 及弹窗加载器的显隐变化，及时挂载/清理开屏舞台
+        const splashObserver = new MutationObserver(() => renderSplashStage());
+        if (document.body) {
+            splashObserver.observe(document.body, { childList: true });
+        }
         const preloaderEl = document.getElementById('preloader');
         if (preloaderEl) {
-            const preloaderObserver = new MutationObserver(() => {
-                const style = window.getComputedStyle(preloaderEl);
-                if (style.display === 'none' || style.visibility === 'hidden') {
-                    stopSplashCarousel();
-                }
-            });
-            preloaderObserver.observe(preloaderEl, { attributes: true, attributeFilter: ['style', 'class'] });
+            splashObserver.observe(preloaderEl, { attributes: true, attributeFilter: ['style', 'class'] });
         }
     });
 })();
