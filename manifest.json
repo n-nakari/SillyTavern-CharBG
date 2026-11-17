@@ -1,11 +1,11 @@
 {
-    "display_name": "角色背景及开屏美化",
+    "display_name": "角色背景及开屏",
     "loading_order": 1,
     "requires": [],
     "optional": [],
     "js": "index.js",
     "css": "style.css",
-    "author": "原作者：@tomato_king0809 二改：@_nak.a.ri",
+    "author": "原作：@tomato_king0809 二改：@_nak.a.ri",
     "version": "1.0.0",
     "homePage": "https://github.com/n-nakari/SillyTavern-CharBG"
 }
