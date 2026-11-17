@@ -21,8 +21,9 @@
     let updateRaf = null;
     let splashCarouselTimer = null;
     let lastSplashUrlsKey = '';
+    let lastSplashHost = null;
 
-    // 读取本地配置（纯同步，供开屏阶段使用）
+    // 读取本地配置（纯同步，供开屏首帧使用）
     const readSavedConfig = () => {
         try {
             const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -253,26 +254,6 @@
         return resolved;
     };
 
-    // 判断当前是否仍处于酒馆加载画面（兼容 #preloader 与 dialog.popup > #loader）
-    const isSplashLoaderVisible = () => {
-        const preloader = document.getElementById('preloader');
-        if (preloader) {
-            const st = window.getComputedStyle(preloader);
-            if (st.display !== 'none' && st.visibility !== 'hidden' && Number(st.opacity) > 0) {
-                return true;
-            }
-        }
-        const popupLoader = document.querySelector('dialog.popup[open]:has(#loader), .popup[open]:has(#loader)');
-        if (popupLoader) {
-            const st = window.getComputedStyle(popupLoader);
-            if (st.display !== 'none' && st.visibility !== 'hidden') {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    // 挂载并控制开屏画面（支持单图展示与多图视差左滑轮换）
     const stopSplashCarousel = () => {
         if (splashCarouselTimer) {
             clearInterval(splashCarouselTimer);
@@ -280,39 +261,57 @@
         }
     };
 
+    const getVisibleSplashHost = () => {
+        const loader = document.getElementById('loader');
+        if (loader && loader.getClientRects().length > 0) return loader;
+
+        const preloader = document.getElementById('preloader');
+        if (preloader && preloader.getClientRects().length > 0) return preloader;
+
+        return null;
+    };
+
+    // 挂载并控制开屏画面（支持单图展示与多图视差左滑轮换）
     const renderSplashStage = () => {
         document.documentElement.classList.toggle('char-bg-splash-active', state.splashEnabled);
 
         const existingStage = document.getElementById(SPLASH_STAGE_ID);
-        if (!state.splashEnabled || !isSplashLoaderVisible()) {
+        if (!state.splashEnabled) {
             stopSplashCarousel();
             if (existingStage) existingStage.remove();
             lastSplashUrlsKey = '';
+            lastSplashHost = null;
             return;
         }
 
-        const currentAvatar = getTargetAvatarSrc() || state.lastAvatar;
+        const host = getVisibleSplashHost();
+        if (!host) {
+            stopSplashCarousel();
+            return;
+        }
+
+        const currentAvatar = getTargetAvatarSrc();
+        const fallbackAvatar = currentAvatar || state.lastAvatar;
         const urls = state.splashMode === 'custom'
             ? resolveCustomSplashUrls()
-            : [currentAvatar].filter(Boolean);
+            : [fallbackAvatar].filter(Boolean);
 
-        // 若还没有任何可用图片链接，则不创建遮挡层，避免出现黑屏盖住 #bg1
-        if (urls.length === 0) {
-            stopSplashCarousel();
-            if (existingStage) existingStage.remove();
-            lastSplashUrlsKey = '';
+        const urlsKey = urls.join('|');
+        if (existingStage && existingStage.parentElement === host && urlsKey === lastSplashUrlsKey) {
             return;
         }
 
-        const urlsKey = urls.join('|');
-        if (existingStage && urlsKey === lastSplashUrlsKey) return;
         lastSplashUrlsKey = urlsKey;
+        lastSplashHost = host;
 
         stopSplashCarousel();
         if (existingStage) existingStage.remove();
 
         const stage = document.createElement('div');
         stage.id = SPLASH_STAGE_ID;
+        if (urls.length === 0) {
+            stage.className = 'is-empty';
+        }
 
         const slides = [];
         urls.forEach((url, idx) => {
@@ -327,15 +326,14 @@
         vignette.className = 'char-bg-splash-vignette';
         stage.appendChild(vignette);
 
-        (document.body || document.documentElement).appendChild(stage);
+        host.insertBefore(stage, host.firstChild);
 
         // 多于一张图时：视差左移 + 柔滑缩放切换
         if (slides.length > 1) {
             let currentIdx = 0;
             splashCarouselTimer = setInterval(() => {
-                if (!isSplashLoaderVisible()) {
+                if (host.getClientRects().length === 0) {
                     stopSplashCarousel();
-                    document.getElementById(SPLASH_STAGE_ID)?.remove();
                     return;
                 }
 
@@ -360,7 +358,7 @@
         }
     };
 
-    // ========== 1. 脚本顶部同步初始化 ==========
+    // ========== 1. 脚本顶部同步首帧初始化 ==========
     applyBgCss(state.enabled, state.bright, state.sat, state.blur, state.lastAvatar);
     applyOverrideCss(state.clearChat, state.clearTop, state.clearBottom);
     renderSplashStage();
@@ -602,14 +600,16 @@
         const chatObserver = new MutationObserver(scheduleUpdate);
         chatObserver.observe(chatEl, { childList: true, subtree: true });
 
-        // 监听 #preloader 及弹窗加载器的显隐变化，及时挂载/清理开屏舞台
-        const splashObserver = new MutationObserver(() => renderSplashStage());
-        if (document.body) {
-            splashObserver.observe(document.body, { childList: true });
-        }
-        const preloaderEl = document.getElementById('preloader');
-        if (preloaderEl) {
-            splashObserver.observe(preloaderEl, { attributes: true, attributeFilter: ['style', 'class'] });
-        }
+        // 监听全局弹窗/加载器出现或关闭，及时挂载或清理轮换
+        const bodyObserver = new MutationObserver(() => {
+            if (!state.splashEnabled) return;
+            const host = getVisibleSplashHost();
+            if (!host) {
+                stopSplashCarousel();
+            } else if (host !== lastSplashHost || !document.getElementById(SPLASH_STAGE_ID)) {
+                renderSplashStage();
+            }
+        });
+        bodyObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'open'] });
     });
 })();
