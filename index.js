@@ -180,8 +180,8 @@ html body .popup[open]:has(#loader.splash-screen)::backdrop {
 }`;
 };
 
-// 更新开屏美化注入样式（原生扩展直接操作主页面 document）
-const updateSplashCss = (isSplashEnabled, isBgEnabled, avatarSrc, splashInput) => {
+// 更新开屏美化注入样式（独立于“角色卡面”开关）
+const updateSplashCss = (isSplashEnabled, avatarSrc, splashInput) => {
     if (!isSplashEnabled) {
         if (lastSplashKey !== '') {
             lastSplashKey = '';
@@ -192,7 +192,7 @@ const updateSplashCss = (isSplashEnabled, isBgEnabled, avatarSrc, splashInput) =
     }
 
     const customUrl = resolveSplashInputUrl(splashInput);
-    const targetBgUrl = customUrl || (isBgEnabled ? avatarSrc : '');
+    const targetBgUrl = customUrl || avatarSrc || '';
     const key = `${isSplashEnabled}|${targetBgUrl}`;
     if (key === lastSplashKey) return;
     lastSplashKey = key;
@@ -214,7 +214,6 @@ const updateSplashCss = (isSplashEnabled, isBgEnabled, avatarSrc, splashInput) =
         if (earlyData.splashEnabled) {
             updateSplashCss(
                 true,
-                Boolean(earlyData.enabled),
                 cachedAvatarSrc,
                 earlyData.splashInput || ''
             );
@@ -388,10 +387,15 @@ const updateCharBg = (shouldSave = true) => {
     }
     const avatarSrc = currentSrc || cachedAvatarSrc;
 
-    $('#bg1').css('filter', '');
+    // 仅在存在残留内联 filter 时才清理，避免无意义的 DOM 样式写入导致闪烁
+    const bg1El = document.getElementById('bg1');
+    if (bg1El && bg1El.style.filter) {
+        bg1El.style.filter = '';
+    }
+
     updateBgCss(isEnabled, b, s, blur, avatarSrc);
     updateOverrideCss(clearChat, clearTop, clearBottom);
-    updateSplashCss(isSplashEnabled, isEnabled, avatarSrc, splashInput);
+    updateSplashCss(isSplashEnabled, avatarSrc, splashInput);
 
     if (shouldSave || needSaveAvatar) saveCfg();
 };
@@ -543,9 +547,19 @@ jQuery(() => {
         }
     } catch (e) {}
 
-    const chatEl = document.getElementById('chat') || document.body;
-    const observer = new MutationObserver(scheduleUpdate);
-    observer.observe(chatEl, { childList: true, subtree: true });
+    // 仅监听 #chat 直接子元素（.mes 消息块）的增删，避免编辑正文/点击按钮触发闪烁
+    const chatEl = document.getElementById('chat');
+    if (chatEl) {
+        const observer = new MutationObserver((mutations) => {
+            const hasMesChange = mutations.some((m) =>
+                [...m.addedNodes, ...m.removedNodes].some(
+                    (node) => node.nodeType === 1 && (node.classList?.contains('mes') || node.querySelector?.('.mes'))
+                )
+            );
+            if (hasMesChange) scheduleUpdate();
+        });
+        observer.observe(chatEl, { childList: true });
+    }
 
     if (!mountMenuButton()) {
         const menuTimer = setInterval(() => {
