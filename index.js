@@ -1,6 +1,3 @@
-// SillyTavern Third-Party Extension: 角色背景与开屏美化
-// Author: @tomato_king0809
-
 (() => {
     const STORAGE_KEY = 'char_bg_data';
     const MENU_BTN_ID = 'st-char-bg-ext-btn';
@@ -264,10 +261,6 @@
     const getVisibleSplashHost = () => {
         const loader = document.getElementById('loader');
         if (loader && loader.getClientRects().length > 0) return loader;
-
-        const preloader = document.getElementById('preloader');
-        if (preloader && preloader.getClientRects().length > 0) return preloader;
-
         return null;
     };
 
@@ -442,7 +435,21 @@
                         </label>
                     </div>
 
-                    <!-- 第二行：消除美化原有遮罩 -->
+                    <!-- 亮度 / 饱和度 / 模糊 -->
+                    <div class="ctrl-row">
+                        <span class="ctrl-label-line">亮度: <span id="val-bright">40</span>% <span class="reset-btn" id="reset-bright" title="恢复默认">${RESET_ICON_SVG}</span></span>
+                        <input type="range" id="char-bg-bright" min="0" max="200" value="40">
+                    </div>
+                    <div class="ctrl-row">
+                        <span class="ctrl-label-line">饱和度: <span id="val-sat">100</span>% <span class="reset-btn" id="reset-sat" title="恢复默认">${RESET_ICON_SVG}</span></span>
+                        <input type="range" id="char-bg-sat" min="0" max="200" value="100">
+                    </div>
+                    <div class="ctrl-row">
+                        <span>模糊: <span id="val-blur">8</span>px</span>
+                        <input type="range" id="char-bg-blur" min="0" max="50" value="8">
+                    </div>
+
+                    <!-- 消除美化原有遮罩 -->
                     <div class="char-bg-section char-bg-group-row">
                         <span class="char-bg-group-title">消除美化原有遮罩：</span>
                         <label class="char-bg-inline-label">
@@ -457,20 +464,6 @@
                             <input type="checkbox" id="char-bg-clear-bottom">
                             <span>底栏</span>
                         </label>
-                    </div>
-
-                    <!-- 亮度 / 饱和度 / 模糊 -->
-                    <div class="ctrl-row">
-                        <span class="ctrl-label-line">亮度: <span id="val-bright">40</span>% <span class="reset-btn" id="reset-bright" title="恢复默认">${RESET_ICON_SVG}</span></span>
-                        <input type="range" id="char-bg-bright" min="0" max="200" value="40">
-                    </div>
-                    <div class="ctrl-row">
-                        <span class="ctrl-label-line">饱和度: <span id="val-sat">100</span>% <span class="reset-btn" id="reset-sat" title="恢复默认">${RESET_ICON_SVG}</span></span>
-                        <input type="range" id="char-bg-sat" min="0" max="200" value="100">
-                    </div>
-                    <div class="ctrl-row">
-                        <span>模糊: <span id="val-blur">8</span>px</span>
-                        <input type="range" id="char-bg-blur" min="0" max="50" value="8">
                     </div>
 
                     <!-- 最底部：开屏美化 -->
@@ -493,10 +486,9 @@
                             </div>
 
                             <div id="char-bg-custom-box" class="char-bg-custom-box">
-                                <div class="char-bg-custom-hint">输入角色名字或图床</div>
-                                <input type="text" id="char-bg-custom-1" class="char-bg-custom-input" placeholder="图片 1（角色名或图床链接）">
-                                <input type="text" id="char-bg-custom-2" class="char-bg-custom-input" placeholder="图片 2（可选）">
-                                <input type="text" id="char-bg-custom-3" class="char-bg-custom-input" placeholder="图片 3（可选）">
+                                <input type="text" id="char-bg-custom-1" placeholder="输入角色名字或图床链接">
+                                <input type="text" id="char-bg-custom-2" placeholder="可选">
+                                <input type="text" id="char-bg-custom-3" placeholder="可选">
                             </div>
                         </div>
                     </div>
@@ -600,7 +592,7 @@
         const chatObserver = new MutationObserver(scheduleUpdate);
         chatObserver.observe(chatEl, { childList: true, subtree: true });
 
-        // 监听全局弹窗/加载器出现或关闭，及时挂载或清理轮换
+        // 监听全局加载器出现或关闭，及时挂载或清理轮换
         const bodyObserver = new MutationObserver(() => {
             if (!state.splashEnabled) return;
             const host = getVisibleSplashHost();
