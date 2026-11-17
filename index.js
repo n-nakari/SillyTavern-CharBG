@@ -1,3 +1,6 @@
+// SillyTavern Third-Party Extension: 角色背景与开屏美化
+// Author: @tomato_king0809
+
 (() => {
     const STORAGE_KEY = 'char_bg_data';
     const MENU_BTN_ID = 'st-char-bg-ext-btn';
@@ -484,9 +487,9 @@
                             </div>
 
                             <div id="char-bg-custom-box" class="char-bg-custom-box">
-                                <input type="text" id="char-bg-custom-1" placeholder="输入角色名字或图床链接">
-                                <input type="text" id="char-bg-custom-2" placeholder="可选">
-                                <input type="text" id="char-bg-custom-3" placeholder="可选">
+                                <input type="text" id="char-bg-custom-1" class="text_pole" placeholder="输入角色名字或图床链接">
+                                <input type="text" id="char-bg-custom-2" class="text_pole" placeholder="可选">
+                                <input type="text" id="char-bg-custom-3" class="text_pole" placeholder="可选">
                             </div>
                         </div>
                     </div>
