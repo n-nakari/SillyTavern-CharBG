@@ -1,0 +1,317 @@
+/* ===== 设置面板基础样式 ===== */
+#char-bg-panel {
+    position: fixed !important;
+    top: 50% !important;
+    right: 10px !important;
+    transform: translateY(-50%);
+    z-index: 999999 !important;
+    width: 248px !important;
+    max-height: 88vh;
+    overflow-y: auto;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: none;
+    flex-direction: column;
+    box-sizing: border-box;
+    font-size: 13px;
+}
+
+#char-bg-panel.dark {
+    background: rgba(0, 0, 0, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #eee;
+}
+
+#char-bg-panel.light {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: #222;
+}
+
+.char-bg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.char-bg-section {
+    margin-bottom: 12px;
+}
+
+.char-bg-group-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 8px;
+    column-gap: 12px;
+}
+
+.char-bg-group-title {
+    width: 100%;
+    font-size: 13px;
+}
+
+.ctrl-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 12px;
+}
+
+.ctrl-label-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.reset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: rgba(128, 128, 128, 0.3);
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.reset-btn:hover {
+    background: rgba(128, 128, 128, 0.55);
+}
+
+#char-bg-panel .char-bg-inline-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: auto !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    font-weight: normal !important;
+}
+
+#char-bg-panel input[type="checkbox"],
+#char-bg-panel input[type="radio"] {
+    width: auto !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    cursor: pointer !important;
+}
+
+#char-bg-panel input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+.char-bg-splash-sub {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(128, 128, 128, 0.25);
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.char-bg-custom-box {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.char-bg-custom-hint {
+    font-size: 11px;
+    opacity: 0.72;
+    line-height: 1.3;
+}
+
+.char-bg-custom-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 5px 8px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    outline: none !important;
+    border: 1px solid rgba(128, 128, 128, 0.35) !important;
+    background: rgba(128, 128, 128, 0.14) !important;
+    color: inherit !important;
+}
+
+.char-bg-custom-input:focus {
+    border-color: rgba(160, 210, 255, 0.75) !important;
+}
+
+/* 让 #bg1 调整滤镜时带有平滑过渡动画 */
+#bg1 {
+    transition: filter 0.3s ease !important;
+}
+
+/* ===== 开屏美化样式（仅在 html.char-bg-splash-active 时激活） ===== */
+html.char-bg-splash-active #preloader {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background-color: #0b0d13 !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: hidden !important;
+}
+
+html.char-bg-splash-active dialog.popup:has(#loader),
+html.char-bg-splash-active .popup[open]:has(#loader),
+html.char-bg-splash-active .popup:has(#loader) > .popup-body,
+html.char-bg-splash-active .popup-content:has(#loader),
+html.char-bg-splash-active dialog.popup:has(#loader)::backdrop {
+    background: none !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.char-bg-splash-active #loader.splash-screen {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
+    font-size: 0 !important;
+    color: transparent !important;
+    pointer-events: none !important;
+}
+
+html.char-bg-splash-active #loader.splash-screen > * {
+    display: none !important;
+}
+
+html.char-bg-splash-active #loader.splash-screen::before {
+    content: "LOADING..." !important;
+    display: block !important;
+    position: fixed !important;
+    left: 50% !important;
+    bottom: 58px !important;
+    transform: translateX(-50%) !important;
+    width: min(520px, 82vw) !important;
+    z-index: 10 !important;
+    box-sizing: border-box !important;
+    padding-left: 0.55em !important;
+    text-align: center !important;
+    font-family: "PingFang SC", "Helvetica Neue", "Segoe UI Light", "Segoe UI", Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 300 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.55em !important;
+    color: rgba(255, 255, 255, 0.86) !important;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85) !important;
+    pointer-events: none !important;
+    animation: st-char-splash-breathe 2.2s ease-in-out infinite !important;
+}
+
+html.char-bg-splash-active #loader.splash-screen::after {
+    content: "" !important;
+    display: block !important;
+    position: fixed !important;
+    left: 50% !important;
+    bottom: 40px !important;
+    transform: translateX(-50%) !important;
+    width: min(520px, 82vw) !important;
+    height: 3px !important;
+    z-index: 10 !important;
+    border-radius: 999px !important;
+    background-color: rgba(255, 255, 255, 0.16) !important;
+    background-image: linear-gradient(
+        90deg,
+        rgba(155, 205, 255, 0.4) 0%,
+        rgba(220, 240, 255, 0.92) 75%,
+        #ffffff 100%
+    ) !important;
+    background-repeat: no-repeat !important;
+    background-size: 0% 100%;
+    box-shadow: 0 0 14px rgba(195, 228, 255, 0.35), 0 0 2px rgba(255, 255, 255, 0.5) !important;
+    pointer-events: none !important;
+    animation: st-char-splash-progress 3.8s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+/* 开屏多图轮换舞台（放在 #preloader 内部，盖住后续加载的 top-bar / send_form） */
+#char-bg-splash-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+    background-color: #0b0d13;
+}
+
+.char-bg-splash-slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: translateX(6%) scale(1.04);
+    will-change: transform, opacity;
+}
+
+.char-bg-splash-slide.is-active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    z-index: 2;
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.85s ease;
+}
+
+.char-bg-splash-slide.is-leaving {
+    opacity: 0;
+    transform: translateX(-6%) scale(1.02);
+    z-index: 1;
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.85s ease;
+}
+
+.char-bg-splash-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(
+        180deg,
+        rgba(8, 10, 16, 0.2) 0%,
+        rgba(0, 0, 0, 0) 20%,
+        rgba(0, 0, 0, 0) 60%,
+        rgba(8, 10, 16, 0.4) 80%,
+        rgba(5, 7, 12, 0.8) 100%
+    );
+}
+
+@keyframes st-char-splash-breathe {
+    0%, 100% { opacity: 0.58; }
+    50% { opacity: 1; }
+}
+
+@keyframes st-char-splash-progress {
+    0% { background-size: 0% 100%; }
+    25% { background-size: 35% 100%; }
+    55% { background-size: 66% 100%; }
+    82% { background-size: 88% 100%; }
+    100% { background-size: 96% 100%; }
+}
