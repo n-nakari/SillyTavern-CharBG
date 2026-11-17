@@ -1,6 +1,3 @@
-// SillyTavern Third-Party Extension: 角色背景与开屏美化
-// Author: @tomato_king0809
-
 (() => {
     const STORAGE_KEY = 'char_bg_data';
     const MENU_BTN_ID = 'st-char-bg-ext-btn';
